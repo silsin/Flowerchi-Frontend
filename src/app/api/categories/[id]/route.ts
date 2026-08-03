@@ -1,0 +1,5 @@
+import { NextRequest } from "next/server";
+import { adminOrError, fail, ok, text } from "@/lib/http";
+import { query } from "@/lib/db";
+export async function PATCH(request:NextRequest, context:{params:Promise<{id:string}>}) { const actor=await adminOrError(); if(!actor)return fail("Unauthorized.",401); const b=await request.json().catch(()=>null),id=(await context.params).id; const r=await query("UPDATE categories SET name=COALESCE(NULLIF($1,''),name),active=COALESCE($2,active) WHERE id=$3 RETURNING *",[text(b?.name,120),typeof b?.active==="boolean"?b.active:null,id]); if(!r.rowCount)return fail("Category not found.",404); await query("INSERT INTO audit_logs (actor_id,action,entity_type,entity_id) VALUES ($1,'update','category',$2)",[actor.id,id]); return ok(r.rows[0]); }
+export async function DELETE(_:NextRequest, context:{params:Promise<{id:string}>}) { const actor=await adminOrError();if(!actor)return fail("Unauthorized.",401);const id=(await context.params).id;try{await query("DELETE FROM categories WHERE id=$1",[id]);return ok({success:true});}catch{return fail("A category with services cannot be deleted.",409);}}

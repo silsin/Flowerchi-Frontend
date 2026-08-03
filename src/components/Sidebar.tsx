@@ -30,6 +30,8 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { platforms } = usePlatforms();
+  const logout = async () => { await fetch("/api/auth/logout", { method: "POST" }); window.location.assign("/login"); };
+  if (pathname === "/login" || pathname === "/setup") return null;
 
   return (
     <aside className="glass" style={{
@@ -118,10 +120,10 @@ export default function Sidebar() {
       </nav>
 
       <div style={{ marginTop: "auto", borderTop: "1px solid var(--card-border)", paddingTop: "1.5rem" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.875rem 1rem", color: "#ef4444", cursor: "pointer" }}>
+        <button onClick={logout} style={{ display: "flex", width:"100%", background:"transparent", border:"none", alignItems: "center", gap: "0.75rem", padding: "0.875rem 1rem", color: "#ef4444", cursor: "pointer" }}>
           <LogOut size={20} />
           <span style={{ fontWeight: 500 }}>خروج</span>
-        </div>
+        </button>
       </div>
     </aside>
   );

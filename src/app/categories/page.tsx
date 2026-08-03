@@ -23,13 +23,16 @@ export default function CategoriesPage() {
     ? initialCategories 
     : initialCategories.filter(c => c.platform === activePlatform);
 
-  const handleAddPlatform = () => {
+  const handleAddPlatform = async () => {
     if (newPlatformName.trim()) {
+      const response = await fetch("/api/platforms", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: newPlatformName }) });
+      if (!response.ok) { alert("ذخیره پلتفرم ناموفق بود."); return; }
       addPlatform(newPlatformName);
       setNewPlatformName("");
       setIsAddingPlatform(false);
     }
   };
+  const addCategory = async () => { const name=prompt("نام دسته‌بندی"); const platform=platforms[0]; if(!name||!platform)return; const slug=prompt("شناسه یکتا (انگلیسی)",name.toLowerCase().replace(/\s+/g,"-")); if(!slug)return; const response=await fetch("/api/categories",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name,slug,platformId:platform.id})}); if(!response.ok)alert("ذخیره دسته‌بندی ناموفق بود."); else window.location.reload(); };
 
   return (
     <div className="animate-fade-in">
@@ -48,7 +51,7 @@ export default function CategoriesPage() {
             <Plus size={18} />
             پلتفرم جدید
           </button>
-          <button className="btn btn-primary">
+          <button className="btn btn-primary" onClick={addCategory}>
             <Plus size={18} />
             دسته‌بندی جدید
           </button>

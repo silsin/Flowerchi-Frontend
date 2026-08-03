@@ -6,6 +6,8 @@ import OrderTable from "@/components/OrderTable";
 
 export default function OrdersPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [status, setStatus] = useState("");
+  const exportOrders = async () => { const r=await fetch(`/api/orders?search=${encodeURIComponent(searchTerm)}&status=${encodeURIComponent(status)}&limit=100`); if(!r.ok)return; const j=await r.json(); const rows=["reference,customer,service,quantity,amount,status",...j.data.items.map((o: {reference:string;customer_name:string;service_name:string;quantity:number;amount:string;status:string})=>[o.reference,o.customer_name,o.service_name,o.quantity,o.amount,o.status].map(v=>`\"${String(v).replace(/\"/g,'\"\"')}\"`).join(","))].join("\n"); const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rows],{type:"text/csv"}));a.download="orders.csv";a.click(); };
 
   return (
     <div className="animate-fade-in">
@@ -19,7 +21,7 @@ export default function OrdersPage() {
           <h1 style={{ margin: 0 }}>مدیریت سفارشات</h1>
           <p>ردیابی و مدیریت تمام سفارشات خدمات کاربران.</p>
         </div>
-        <button className="btn btn-primary">
+        <button className="btn btn-primary" onClick={exportOrders}>
           <Download size={18} />
           خروجی همه
         </button>
@@ -38,7 +40,7 @@ export default function OrdersPage() {
           </div>
           
           <div style={{ display: "flex", gap: "1rem" }}>
-            <select style={{ 
+            <select value={status} onChange={e=>setStatus(e.target.value)} style={{ 
               background: "rgba(255,255,255,0.05)", 
               border: "1px solid var(--card-border)", 
               color: "white", 
@@ -60,7 +62,7 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      <OrderTable />
+      <OrderTable search={searchTerm} status={status} />
 
       <footer style={{ 
         display: "flex", 

@@ -10,6 +10,7 @@ const withPWA = withPWAInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
+  output: 'standalone',
 };
 
 export default withPWA(nextConfig);

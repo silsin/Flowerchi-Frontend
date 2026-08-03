@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import { PlatformProvider } from "@/context/PlatformContext";
+import AuthGate from "@/components/AuthGate";
 
 export const metadata: Metadata = {
   title: "مدیریت خدمات | پنل مدیریت",
@@ -22,15 +23,15 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;400;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="antialiased">
-        <PlatformProvider>
+      <body className="antialiased" suppressHydrationWarning>
+        <AuthGate><PlatformProvider>
           <div className="dashboard-container">
             <Sidebar />
             <main className="main-content">
               {children}
             </main>
           </div>
-        </PlatformProvider>
+        </PlatformProvider></AuthGate>
       </body>
     </html>
   );
