@@ -31,7 +31,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { platforms } = usePlatforms();
   const logout = async () => { await fetch("/api/auth/logout", { method: "POST" }); window.location.assign("/login"); };
-  if (pathname === "/login" || pathname === "/setup") return null;
+  if (pathname === "/" || pathname === "/login" || pathname === "/setup" || pathname === "/payment-result") return null;
 
   return (
     <aside className="glass" style={{

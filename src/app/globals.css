@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;400;700&display=swap');
 @import './storefront.css';
+@import './storefront-media.css';
 
 :root {
   --background: #050505;
