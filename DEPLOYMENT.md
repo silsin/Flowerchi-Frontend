@@ -13,7 +13,7 @@
 
 PostgreSQL is stored in the `postgres_data` Docker volume. Do not remove that volume unless the data should be permanently deleted.
 
-Nginx owns ports 80 and 443 and routes HTTPS traffic internally to the application. Before starting, point the domain's DNS A record at this server and make ports 80/443 reachable. Stop any existing host Nginx/Apache service that already owns those ports.
+By default, the application runs on host port `30003` and is intended to be proxied by an existing host Nginx. Use the configuration in `docker/host-nginx.conf`, then obtain or retain the host's HTTPS certificate. The optional Docker-managed Nginx and Certbot stack is available only when ports 80/443 are free: `docker compose --profile docker-edge up -d --build`.
 
 ## First administrator
 
