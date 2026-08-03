@@ -2,8 +2,8 @@ services:
   app:
     build: .
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       DATABASE_URL: postgresql://flowerchi:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/flowerchi
       AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET in .env}
@@ -12,6 +12,36 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx.Dockerfile
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
+    volumes:
+      - certbot_www:/var/www/certbot:ro
+      - letsencrypt:/etc/letsencrypt
+    depends_on:
+      - app
+
+  certbot:
+    image: certbot/certbot:latest
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL:?Set LETSENCRYPT_EMAIL in .env}
+    volumes:
+      - certbot_www:/var/www/certbot
+      - letsencrypt:/etc/letsencrypt
+    depends_on:
+      - nginx
+    entrypoint: /bin/sh
+    command: -c 'until certbot certonly --webroot --webroot-path /var/www/certbot --email "$$LETSENCRYPT_EMAIL" --agree-tos --no-eff-email --non-interactive -d "$$DOMAIN"; do sleep 60; done; while :; do sleep 12h; certbot renew --webroot --webroot-path /var/www/certbot --quiet; done'
 
   db:
     image: postgres:16-alpine
@@ -31,3 +61,5 @@ services:
 
 volumes:
   postgres_data:
+  certbot_www:
+  letsencrypt:

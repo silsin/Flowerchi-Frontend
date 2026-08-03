@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function AdminPage(){return <div className="animate-fade-in"><h1>پنل مدیریت</h1><p>مدیریت سفارش‌ها، کاربران و خدمات فروشگاه.</p><div className="grid grid-cols-3" style={{marginTop:"2rem"}}>{[["سفارش‌ها","/orders"],["کاربران","/users"],["دسته‌بندی‌ها","/categories"],["آمار","/analytics"],["تنظیمات","/settings"]].map(([label,href])=><Link key={href} className="glass glass-hover" href={href} style={{padding:"1.5rem",borderRadius:20,color:"white",textDecoration:"none"}}>{label}</Link>)}</div></div>}

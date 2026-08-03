@@ -3,7 +3,7 @@
 ## One-command installation
 
 1. Copy `.env.example` to `.env` and replace every placeholder. Generate long random values for `POSTGRES_PASSWORD` and `AUTH_SECRET` (at least 32 characters).
-2. Set `NEXT_PUBLIC_APP_URL` to the public HTTPS address of the application, for example `https://panel.example.com`.
+2. Set `DOMAIN`, `LETSENCRYPT_EMAIL`, and `NEXT_PUBLIC_APP_URL` to the public domain details. The Compose stack automatically configures Nginx, requests the initial Let's Encrypt certificate, and renews it.
 3. Add the same callback address in Zarinpal: `https://panel.example.com/api/payments/zarinpal/callback`.
 4. Start the stack:
 
@@ -12,6 +12,8 @@
    ```
 
 PostgreSQL is stored in the `postgres_data` Docker volume. Do not remove that volume unless the data should be permanently deleted.
+
+Nginx owns ports 80 and 443 and routes HTTPS traffic internally to the application. Before starting, point the domain's DNS A record at this server and make ports 80/443 reachable. Stop any existing host Nginx/Apache service that already owns those ports.
 
 ## First administrator
 
