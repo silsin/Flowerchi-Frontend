@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
+import AppShell from "@/components/AppShell";
 import { PlatformProvider } from "@/context/PlatformContext";
 import AuthGate from "@/components/AuthGate";
 
@@ -25,12 +25,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased" suppressHydrationWarning>
         <AuthGate><PlatformProvider>
-          <div className="dashboard-container">
-            <Sidebar />
-            <main className="main-content">
-              {children}
-            </main>
-          </div>
+          <AppShell>{children}</AppShell>
         </PlatformProvider></AuthGate>
       </body>
     </html>
