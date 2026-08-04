@@ -67,9 +67,11 @@ AUTH_SECRET_ESCAPED=$(printf '%s\n' "$AUTH_SECRET" | sed -e 's/[\/&]/\\&/g')
 if [[ "$OSTYPE" == "darwin"* ]]; then
     sed -i '' "s/replace-with-a-long-random-password/$POSTGRES_PASSWORD_ESCAPED/" .env
     sed -i '' "s/replace-with-at-least-32-random-characters/$AUTH_SECRET_ESCAPED/" .env
+    sed -i '' "s/change-this-db-password/$POSTGRES_PASSWORD_ESCAPED/" .env
 else
     sed -i "s/replace-with-a-long-random-password/$POSTGRES_PASSWORD_ESCAPED/" .env
     sed -i "s/replace-with-at-least-32-random-characters/$AUTH_SECRET_ESCAPED/" .env
+    sed -i "s/change-this-db-password/$POSTGRES_PASSWORD_ESCAPED/" .env
 fi
 
 print_success ".env updated with generated passwords"
