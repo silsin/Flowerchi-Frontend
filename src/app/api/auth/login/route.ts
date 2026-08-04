@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   if (!user || user.status !== "active" || !["admin", "manager"].includes(user.role) || !(await verifyPassword(password, user.password_hash))) {
     return fail("Invalid email or password.", 401);
   }
-  await query("INSERT INTO audit_logs (actor_id, action, entity_type, entity_id) VALUES ($1, 'login', 'user', $1)", [user.id]);
+  await query("INSERT INTO audit_logs (actor_id, action, entity_type, entity_id) VALUES ($1, 'login', 'user', $1::TEXT)", [user.id]);
   const response = NextResponse.json({ data: { id: user.id, name: user.name, role: user.role } });
   setSession(response, user);
   return response;
