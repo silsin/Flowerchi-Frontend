@@ -19,7 +19,7 @@ import { motion } from "framer-motion";
 import { usePlatforms } from "@/context/PlatformContext";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "داشبورد", href: "/" },
+  { icon: LayoutDashboard, label: "داشبورد", href: "/admin" },
   { icon: Layers, label: "دسته‌بندی‌ها", href: "/categories" },
   { icon: ShoppingCart, label: "سفارشات", href: "/orders" },
   { icon: Users, label: "کاربران", href: "/users" },

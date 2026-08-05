@@ -1,27 +1,54 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Search, Instagram, Send, AppWindow, MoreVertical, Edit2, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Search, Instagram, Send, AppWindow, MoreVertical, Edit2, Trash2, Loader } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePlatforms } from "@/context/PlatformContext";
+import { AddCategoryModal } from "@/components/AddCategoryModal";
 
-const initialCategories = [
-  { id: 1, platform: "اینستاگرام", name: "فالور با کیفیت", price: "۴,۰۰۰ تومان", status: "فعال", services: 12 },
-  { id: 2, platform: "اینستاگرام", name: "لایک واقعی", price: "۱,۵۰۰ تومان", status: "فعال", services: 8 },
-  { id: 3, platform: "تلگرام", name: "ممبر کانال", price: "۲,۰۰۰ تومان", status: "فعال", services: 5 },
-  { id: 4, platform: "تلگرام", name: "بازدید پست", price: "۱۰۰ تومان", status: "فعال", services: 3 },
-  { id: 5, platform: "تیک‌تاک", name: "بازدید عالی", price: "۵۰ تومان", status: "فعال", services: 15 },
-];
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  platform_id: number;
+  platform_name: string;
+  status: string;
+  created_at: string;
+  service_count?: number;
+}
 
 export default function CategoriesPage() {
   const { platforms, addPlatform } = usePlatforms();
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activePlatform, setActivePlatform] = useState("همه");
   const [isAddingPlatform, setIsAddingPlatform] = useState(false);
   const [newPlatformName, setNewPlatformName] = useState("");
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/categories");
+      if (!response.ok) throw new Error("Failed to fetch categories");
+      
+      const data = await response.json();
+      setCategories(data.items || []);
+    } catch (error) {
+      console.error("خطا در دریافت دسته‌بندی‌ها:", error);
+      setCategories([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   const filteredCategories = activePlatform === "همه" 
-    ? initialCategories 
-    : initialCategories.filter(c => c.platform === activePlatform);
+    ? categories 
+    : categories.filter(c => c.platform_name === activePlatform);
 
   const handleAddPlatform = async () => {
     if (newPlatformName.trim()) {
@@ -32,7 +59,24 @@ export default function CategoriesPage() {
       setIsAddingPlatform(false);
     }
   };
-  const addCategory = async () => { const name=prompt("نام دسته‌بندی"); const platform=platforms[0]; if(!name||!platform)return; const slug=prompt("شناسه یکتا (انگلیسی)",name.toLowerCase().replace(/\s+/g,"-")); if(!slug)return; const response=await fetch("/api/categories",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name,slug,platformId:platform.id})}); if(!response.ok)alert("ذخیره دسته‌بندی ناموفق بود."); else window.location.reload(); };
+
+  const handleAddCategory = async (name: string, slug: string) => {
+    const platform = platforms[0];
+    if (!platform) throw new Error("هیچ پلتفرمی موجود نیست");
+    
+    const response = await fetch("/api/categories", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ name, slug, platformId: platform.id })
+    });
+    
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "ذخیره دسته‌بندی ناموفق بود");
+    }
+    
+    window.location.reload();
+  };
 
   return (
     <div className="animate-fade-in">
@@ -51,7 +95,7 @@ export default function CategoriesPage() {
             <Plus size={18} />
             پلتفرم جدید
           </button>
-          <button className="btn btn-primary" onClick={addCategory}>
+          <button className="btn btn-primary" onClick={() => setIsAddingCategory(true)}>
             <Plus size={18} />
             دسته‌بندی جدید
           </button>
@@ -125,8 +169,18 @@ export default function CategoriesPage() {
       </div>
 
       <div className="grid grid-cols-3">
+        {loading && (
+          <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "2rem" }}>
+            <Loader size={24} style={{ animation: "spin 1s linear infinite", margin: "0 auto" }} />
+          </div>
+        )}
+        {!loading && filteredCategories.length === 0 && (
+          <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "2rem", opacity: 0.6 }}>
+            هیچ دسته‌بندی‌ای یافت نشد
+          </div>
+        )}
         <AnimatePresence>
-          {filteredCategories.map((cat) => (
+          {!loading && filteredCategories.map((cat) => (
             <motion.div
               layout
               key={cat.id}
@@ -141,9 +195,9 @@ export default function CategoriesPage() {
                   padding: "0.75rem", 
                   borderRadius: "12px", 
                   background: "rgba(255, 255, 255, 0.05)",
-                  color: platforms.find(p => p.name === cat.platform)?.color || "var(--primary)"
+                  color: "var(--primary)"
                 }}>
-                  {cat.platform === "اینستاگرام" ? <Instagram size={24} /> : cat.platform === "تلگرام" ? <Send size={24} /> : <AppWindow size={24} />}
+                  {cat.platform_name === "اینستاگرام" ? <Instagram size={24} /> : cat.platform_name === "تلگرام" ? <Send size={24} /> : <AppWindow size={24} />}
                 </div>
                 <button style={{ background: "transparent", border: "none", color: "rgba(255,255,255,0.4)", cursor: "pointer" }}>
                   <MoreVertical size={20} />
@@ -151,16 +205,16 @@ export default function CategoriesPage() {
               </div>
               
               <h3 style={{ margin: "0 0 0.25rem", fontSize: "1.25rem" }}>{cat.name}</h3>
-              <p style={{ margin: "0 0 1rem", fontSize: "0.875rem", opacity: 0.6 }}>{cat.platform}</p>
+              <p style={{ margin: "0 0 1rem", fontSize: "0.875rem", opacity: 0.6 }}>{cat.platform_name}</p>
               
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px solid var(--card-border)" }}>
                 <div>
-                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.5 }}>تعداد سرویس‌ها</p>
-                  <p style={{ margin: 0, fontWeight: 700 }}>{cat.services}</p>
+                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.5 }}>وضعیت</p>
+                  <p style={{ margin: 0, fontWeight: 700 }}>{cat.status === "active" ? "فعال" : "غیرفعال"}</p>
                 </div>
                 <div style={{ textAlign: "left" }}>
-                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.5 }}>شروع قیمت از</p>
-                  <p style={{ margin: 0, fontWeight: 700, color: "var(--success)" }}>{cat.price}</p>
+                  <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.5 }}>تاریخ ایجاد</p>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: "0.875rem" }}>{new Date(cat.created_at).toLocaleDateString('fa-IR')}</p>
                 </div>
               </div>
 
@@ -178,6 +232,13 @@ export default function CategoriesPage() {
           ))}
         </AnimatePresence>
       </div>
+
+      <AddCategoryModal
+        isOpen={isAddingCategory}
+        onClose={() => setIsAddingCategory(false)}
+        onSubmit={handleAddCategory}
+        platformName={platforms[0]?.name || ""}
+      />
     </div>
   );
 }
