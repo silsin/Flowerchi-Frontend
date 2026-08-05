@@ -40,8 +40,9 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
       try {
         const response = await fetch("/api/platforms");
         if (response.ok) {
-          const data = await response.json();
-          const platformsWithIcons = (data.items || []).map((p: Platform) => ({
+          const result = await response.json();
+          const platformsData = result.data || [];
+          const platformsWithIcons = (Array.isArray(platformsData) ? platformsData : []).map((p: Platform) => ({
             ...p,
             icon: platformIcons[p.name] || platformIcons[p.slug || ""] || AppWindow,
           }));

@@ -33,8 +33,9 @@ export default function CategoriesPage() {
       const response = await fetch("/api/categories");
       if (!response.ok) throw new Error("Failed to fetch categories");
       
-      const data = await response.json();
-      setCategories(data.items || data || []);
+      const result = await response.json();
+      const data = result.data;
+      setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("خطا در دریافت دسته‌بندی‌ها:", error);
       setCategories([]);
