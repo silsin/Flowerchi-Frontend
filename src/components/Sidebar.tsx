@@ -101,22 +101,26 @@ export default function Sidebar() {
           </Link>
         </div>
         
-        {platforms.map((platform) => (
-          <div
-            key={platform.name}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem",
-              padding: "0.875rem 1rem",
-              color: "rgba(255,255,255,0.6)",
-              cursor: "pointer"
-            }}
-          >
-            <platform.icon size={20} color={platform.color} />
-            <span style={{ fontWeight: 500 }}>{platform.name}</span>
-          </div>
-        ))}
+        {platforms.map((platform) => {
+          // Default to AppWindow if icon is not available
+          const Icon = platform.icon || AppWindow;
+          return (
+            <div
+              key={platform.name}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.75rem",
+                padding: "0.875rem 1rem",
+                color: "rgba(255,255,255,0.6)",
+                cursor: "pointer"
+              }}
+            >
+              <Icon size={20} color={platform.color || "currentColor"} />
+              <span style={{ fontWeight: 500 }}>{platform.name}</span>
+            </div>
+          );
+        })}
       </nav>
 
       <div style={{ marginTop: "auto", borderTop: "1px solid var(--card-border)", paddingTop: "1.5rem" }}>
