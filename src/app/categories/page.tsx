@@ -5,6 +5,7 @@ import { Plus, Search, Instagram, Send, AppWindow, MoreVertical, Edit2, Trash2, 
 import { motion, AnimatePresence } from "framer-motion";
 import { usePlatforms } from "@/context/PlatformContext";
 import { AddCategoryModal } from "@/components/AddCategoryModal";
+import { CategoryServicesList } from "@/components/CategoryServicesList";
 
 interface Category {
   id: number;
@@ -75,7 +76,8 @@ export default function CategoriesPage() {
       throw new Error(error.message || "ذخیره دسته‌بندی ناموفق بود");
     }
     
-    window.location.reload();
+    setIsAddingCategory(false);
+    await fetchCategories();
   };
 
   return (
@@ -228,6 +230,9 @@ export default function CategoriesPage() {
                   حذف
                 </button>
               </div>
+
+              {/* Services List */}
+              <CategoryServicesList categoryId={cat.id.toString()} categoryName={cat.name} />
             </motion.div>
           ))}
         </AnimatePresence>
