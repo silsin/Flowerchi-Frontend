@@ -94,10 +94,10 @@ export async function requireAdmin() {
 }
 
 export function setSession(response: NextResponse, user: { id: string; role: "admin" | "manager" }) {
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction = process.env.NODE_ENV === "production" && !process.env.DATABASE_URL?.includes("@localhost");
   response.cookies.set(COOKIE, token({ sub: user.id, role: user.role, exp: Math.floor(Date.now() / 1000) + SESSION_TTL }), {
     httpOnly: true, 
-    sameSite: isProduction ? "lax" : "lax",
+    sameSite: "lax",
     secure: isProduction,
     path: "/", 
     maxAge: SESSION_TTL,
