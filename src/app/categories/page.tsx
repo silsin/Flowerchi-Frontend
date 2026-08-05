@@ -61,14 +61,13 @@ export default function CategoriesPage() {
     }
   };
 
-  const handleAddCategory = async (name: string, slug: string) => {
-    const platform = platforms[0];
-    if (!platform) throw new Error("هیچ پلتفرمی موجود نیست");
+  const handleAddCategory = async (name: string, slug: string, platformId: string) => {
+    if (!platformId) throw new Error("انتخاب پلتفرم الزامی است");
     
     const response = await fetch("/api/categories", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name, slug, platformId: platform.id })
+      body: JSON.stringify({ name, slug, platformId })
     });
     
     if (!response.ok) {
@@ -243,6 +242,7 @@ export default function CategoriesPage() {
         onClose={() => setIsAddingCategory(false)}
         onSubmit={handleAddCategory}
         platformName={platforms[0]?.name || ""}
+        platforms={platforms}
       />
     </div>
   );

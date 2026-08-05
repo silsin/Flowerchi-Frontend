@@ -4,15 +4,22 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { X, Loader } from "lucide-react";
 
+interface Platform {
+  id: string;
+  name: string;
+}
+
 interface AddCategoryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string, slug: string) => Promise<void>;
+  onSubmit: (name: string, slug: string, platformId: string) => Promise<void>;
   platformName: string;
+  platforms: Platform[];
 }
 
-export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: AddCategoryModalProps) {
+export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName, platforms = [] }: AddCategoryModalProps) {
   const [name, setName] = useState("");
+  const [selectedPlatformId, setSelectedPlatformId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,6 +40,11 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
       return;
     }
 
+    if (!selectedPlatformId) {
+      setError("انتخاب پلتفرم الزامی است");
+      return;
+    }
+
     const slug = generateSlug(name);
 
     if (!slug) {
@@ -42,8 +54,9 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
 
     setIsLoading(true);
     try {
-      await onSubmit(name, slug);
+      await onSubmit(name, slug, selectedPlatformId);
       setName("");
+      setSelectedPlatformId(null);
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "خطای نامشخصی رخ داد");
@@ -66,6 +79,7 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
       }}
       onClick={onClose}
     >
@@ -80,6 +94,9 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
           width: "90%",
           maxWidth: "500px",
           boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+          background: "rgba(20, 20, 35, 0.95)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -107,6 +124,37 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "1.5rem" }}>
             <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.875rem", opacity: 0.8 }}>
+              پلتفرم *
+            </label>
+            <select
+              value={selectedPlatformId || ""}
+              onChange={(e) => setSelectedPlatformId(e.target.value || null)}
+              disabled={isLoading}
+              style={{
+                width: "100%",
+                padding: "0.75rem 1rem",
+                borderRadius: "12px",
+                border: "1px solid var(--card-border)",
+                background: "rgba(255,255,255,0.05)",
+                color: "white",
+                outline: "none",
+                fontSize: "1rem",
+                direction: "rtl",
+                boxSizing: "border-box",
+                cursor: isLoading ? "not-allowed" : "pointer",
+              }}
+            >
+              <option value="">انتخاب پلتفرم...</option>
+              {platforms.map((p) => (
+                <option key={p.id} value={p.id} style={{ background: "#1a1a2e", color: "white" }}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div style={{ marginBottom: "1.5rem" }}>
+            <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.875rem", opacity: 0.8 }}>
               نام دسته‌بندی *
             </label>
             <input
@@ -129,9 +177,6 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
                 boxSizing: "border-box",
               }}
             />
-            <p style={{ margin: "0.5rem 0 0", fontSize: "0.75rem", opacity: 0.5 }}>
-              پلتفرم: {platformName}
-            </p>
           </div>
 
           {error && (
