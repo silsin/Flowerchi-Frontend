@@ -57,14 +57,24 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
     fetchPlatforms();
   }, []);
 
-  const addPlatform = (name: string, color: string = "#8b5cf6") => {
-    const newPlatform: Platform = {
-      id: Math.random().toString(36).substr(2, 9),
-      name,
-      color,
-      icon: platformIcons[name] || AppWindow,
-    };
-    setPlatforms([...platforms, newPlatform]);
+  const addPlatform = async (name: string, color: string = "#8b5cf6") => {
+    try {
+      const response = await fetch("/api/platforms", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, color })
+      });
+      
+      if (response.ok) {
+        const newPlatform = await response.json();
+        setPlatforms([...platforms, {
+          ...newPlatform,
+          icon: platformIcons[newPlatform.name] || AppWindow,
+        }]);
+      }
+    } catch (error) {
+      console.error("Failed to add platform:", error);
+    }
   };
 
   const removePlatform = (id: string) => {

@@ -53,9 +53,7 @@ export default function CategoriesPage() {
 
   const handleAddPlatform = async () => {
     if (newPlatformName.trim()) {
-      const response = await fetch("/api/platforms", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ name: newPlatformName }) });
-      if (!response.ok) { alert("ذخیره پلتفرم ناموفق بود."); return; }
-      addPlatform(newPlatformName);
+      await addPlatform(newPlatformName);
       setNewPlatformName("");
       setIsAddingPlatform(false);
     }
