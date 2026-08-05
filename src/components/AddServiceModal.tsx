@@ -94,6 +94,7 @@ export function AddServiceModal({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
       }}
       onClick={onClose}
     >
@@ -107,6 +108,10 @@ export function AddServiceModal({
           maxWidth: "500px",
           borderRadius: "20px",
           padding: "2rem",
+          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+          background: "rgba(20, 20, 35, 0.95)",
+          backdropFilter: "blur(10px)",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
         }}
         onClick={(e) => e.stopPropagation()}
       >
