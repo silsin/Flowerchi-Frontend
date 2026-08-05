@@ -94,8 +94,13 @@ export async function requireAdmin() {
 }
 
 export function setSession(response: NextResponse, user: { id: string; role: "admin" | "manager" }) {
+  const isProduction = process.env.NODE_ENV === "production";
   response.cookies.set(COOKIE, token({ sub: user.id, role: user.role, exp: Math.floor(Date.now() / 1000) + SESSION_TTL }), {
-    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: SESSION_TTL,
+    httpOnly: true, 
+    sameSite: isProduction ? "lax" : "lax",
+    secure: isProduction,
+    path: "/", 
+    maxAge: SESSION_TTL,
   });
 }
 
