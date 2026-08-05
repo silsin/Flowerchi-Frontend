@@ -19,7 +19,7 @@ interface Category {
 }
 
 export default function CategoriesPage() {
-  const { platforms, addPlatform } = usePlatforms();
+  const { platforms, addPlatform, loading: platformsLoading } = usePlatforms();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [activePlatform, setActivePlatform] = useState("همه");
@@ -34,7 +34,7 @@ export default function CategoriesPage() {
       if (!response.ok) throw new Error("Failed to fetch categories");
       
       const data = await response.json();
-      setCategories(data.items || []);
+      setCategories(data.items || data || []);
     } catch (error) {
       console.error("خطا در دریافت دسته‌بندی‌ها:", error);
       setCategories([]);
@@ -46,6 +46,13 @@ export default function CategoriesPage() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  // Refetch categories when platforms load
+  useEffect(() => {
+    if (!platformsLoading && platforms.length > 0) {
+      fetchCategories();
+    }
+  }, [platformsLoading, platforms.length]);
 
   const filteredCategories = activePlatform === "همه" 
     ? categories 
