@@ -44,10 +44,10 @@ export function CategoryServicesList({ categoryId, categoryName, onAddServiceCli
   };
 
   useEffect(() => {
-    if (isExpanded && services.length === 0) {
+    if (isExpanded) {
       fetchServices();
     }
-  }, [isExpanded]);
+  }, [isExpanded, categoryId]);
 
   const handleDeleteService = async (serviceId: string) => {
     if (!confirm("آیا مطمئن هستید؟")) return;

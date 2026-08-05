@@ -115,6 +115,7 @@ export default function CategoriesPage() {
     setIsAddingService(false);
     setSelectedCategoryId(null);
     setSelectedCategoryName("");
+    // Refetch categories to update service counts and lists
     await fetchCategories();
   };
 
