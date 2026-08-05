@@ -5,10 +5,10 @@ import { query } from "@/lib/db";
 export async function GET(request: NextRequest) {
   const platformId = request.nextUrl.searchParams.get("platformId");
   const result = await query(
-    `SELECT c.id, c.name, c.slug, c.active, c.platform_id, p.name AS platform_name,
+    `SELECT c.id, c.name, c.slug, c.active, c.platform_id, c.created_at, p.name AS platform_name,
       COUNT(s.id)::int AS service_count, COALESCE(MIN(s.price), 0)::bigint AS starting_price
      FROM categories c JOIN platforms p ON p.id = c.platform_id LEFT JOIN services s ON s.category_id = c.id
-     WHERE ($1::uuid IS NULL OR c.platform_id = $1) GROUP BY c.id, p.name ORDER BY c.name`, [platformId],
+     WHERE ($1::uuid IS NULL OR c.platform_id = $1) GROUP BY c.id, p.name, c.created_at ORDER BY c.name`, [platformId],
   );
   return ok(result.rows);
 }

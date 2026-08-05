@@ -14,7 +14,7 @@ interface Category {
   slug: string;
   platform_id: number;
   platform_name: string;
-  status: string;
+  active: boolean;
   created_at: string;
   service_count?: number;
 }
@@ -251,11 +251,13 @@ export default function CategoriesPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1.5rem", paddingTop: "1rem", borderTop: "1px solid var(--card-border)" }}>
                 <div>
                   <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.5 }}>وضعیت</p>
-                  <p style={{ margin: 0, fontWeight: 700 }}>{cat.status === "active" ? "فعال" : "غیرفعال"}</p>
+                  <p style={{ margin: 0, fontWeight: 700 }}>{cat.active ? "فعال" : "غیرفعال"}</p>
                 </div>
                 <div style={{ textAlign: "left" }}>
                   <p style={{ margin: 0, fontSize: "0.75rem", opacity: 0.5 }}>تاریخ ایجاد</p>
-                  <p style={{ margin: 0, fontWeight: 700, fontSize: "0.875rem" }}>{new Date(cat.created_at).toLocaleDateString('fa-IR')}</p>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: "0.875rem" }}>
+                    {cat.created_at ? new Date(cat.created_at).toLocaleDateString('fa-IR', { dateStyle: 'medium' }) : "—"}
+                  </p>
                 </div>
               </div>
 
