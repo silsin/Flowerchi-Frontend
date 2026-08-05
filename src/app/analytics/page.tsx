@@ -71,6 +71,8 @@ export default function AnalyticsPage() {
       maximumFractionDigits: 0
     }).format(amount);
   };
+
+  return (
     <div className="animate-fade-in">
       <header style={{ 
         display: "flex", 
