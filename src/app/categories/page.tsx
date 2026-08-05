@@ -5,6 +5,7 @@ import { Plus, Search, Instagram, Send, AppWindow, MoreVertical, Edit2, Trash2, 
 import { motion, AnimatePresence } from "framer-motion";
 import { usePlatforms } from "@/context/PlatformContext";
 import { AddCategoryModal } from "@/components/AddCategoryModal";
+import { AddServiceModal } from "@/components/AddServiceModal";
 import { CategoryServicesList } from "@/components/CategoryServicesList";
 
 interface Category {
@@ -26,6 +27,9 @@ export default function CategoriesPage() {
   const [isAddingPlatform, setIsAddingPlatform] = useState(false);
   const [newPlatformName, setNewPlatformName] = useState("");
   const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [isAddingService, setIsAddingService] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string>("");
 
   const fetchCategories = async () => {
     try {
@@ -82,6 +86,35 @@ export default function CategoriesPage() {
     }
     
     setIsAddingCategory(false);
+    await fetchCategories();
+  };
+
+  const handleAddService = async (serviceData: {
+    name: string;
+    description: string;
+    price: number;
+    minQuantity: number;
+    maxQuantity: number;
+  }) => {
+    if (!selectedCategoryId) throw new Error("دسته‌بندی انتخاب نشده است");
+
+    const response = await fetch("/api/services", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        ...serviceData,
+        categoryId: selectedCategoryId,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "ذخیره خدمت ناموفق بود");
+    }
+
+    setIsAddingService(false);
+    setSelectedCategoryId(null);
+    setSelectedCategoryName("");
     await fetchCategories();
   };
 
@@ -237,7 +270,15 @@ export default function CategoriesPage() {
               </div>
 
               {/* Services List */}
-              <CategoryServicesList categoryId={cat.id.toString()} categoryName={cat.name} />
+              <CategoryServicesList 
+                categoryId={cat.id.toString()} 
+                categoryName={cat.name}
+                onAddServiceClick={() => {
+                  setSelectedCategoryId(cat.id.toString());
+                  setSelectedCategoryName(cat.name);
+                  setIsAddingService(true);
+                }}
+              />
             </motion.div>
           ))}
         </AnimatePresence>
@@ -250,6 +291,19 @@ export default function CategoriesPage() {
         platformName={platforms[0]?.name || ""}
         platforms={platforms}
       />
+
+      {typeof window !== "undefined" && (
+        <AddServiceModal
+          isOpen={isAddingService}
+          onClose={() => {
+            setIsAddingService(false);
+            setSelectedCategoryId(null);
+            setSelectedCategoryName("");
+          }}
+          onSubmit={handleAddService}
+          categoryName={selectedCategoryName}
+        />
+      )}
     </div>
   );
 }

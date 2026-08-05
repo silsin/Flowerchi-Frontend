@@ -18,13 +18,13 @@ interface Service {
 interface CategoryServicesListProps {
   categoryId: string;
   categoryName: string;
+  onAddServiceClick: () => void;
 }
 
-export function CategoryServicesList({ categoryId, categoryName }: CategoryServicesListProps) {
+export function CategoryServicesList({ categoryId, categoryName, onAddServiceClick }: CategoryServicesListProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(false);
-  const [isAddingService, setIsAddingService] = useState(false);
 
   const fetchServices = async () => {
     try {
@@ -32,8 +32,9 @@ export function CategoryServicesList({ categoryId, categoryName }: CategoryServi
       const response = await fetch(`/api/services?categoryId=${categoryId}`);
       if (!response.ok) throw new Error("Failed to fetch services");
       
-      const data = await response.json();
-      setServices(data.items || []);
+      const result = await response.json();
+      const data = result.data;
+      setServices(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("خطا در دریافت خدمات:", error);
       setServices([]);
@@ -47,31 +48,6 @@ export function CategoryServicesList({ categoryId, categoryName }: CategoryServi
       fetchServices();
     }
   }, [isExpanded]);
-
-  const handleAddService = async (serviceData: {
-    name: string;
-    description: string;
-    price: number;
-    minQuantity: number;
-    maxQuantity: number;
-  }) => {
-    const response = await fetch("/api/services", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        ...serviceData,
-        categoryId,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || "ذخیره خدمت ناموفق بود");
-    }
-
-    setIsAddingService(false);
-    await fetchServices();
-  };
 
   const handleDeleteService = async (serviceId: string) => {
     if (!confirm("آیا مطمئن هستید؟")) return;
@@ -218,7 +194,7 @@ export function CategoryServicesList({ categoryId, categoryName }: CategoryServi
 
               {/* Add Service Button */}
               <button
-                onClick={() => setIsAddingService(true)}
+                onClick={onAddServiceClick}
                 style={{
                   width: "100%",
                   padding: "0.75rem",
@@ -251,13 +227,6 @@ export function CategoryServicesList({ categoryId, categoryName }: CategoryServi
           )}
         </AnimatePresence>
       </motion.div>
-
-      <AddServiceModal
-        isOpen={isAddingService}
-        onClose={() => setIsAddingService(false)}
-        onSubmit={handleAddService}
-        categoryName={categoryName}
-      />
     </>
   );
 }
