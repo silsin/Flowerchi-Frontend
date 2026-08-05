@@ -1,38 +1,68 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { Instagram, Send, Smartphone, AppWindow, LucideIcon } from "lucide-react";
 
 export interface Platform {
   id: string;
   name: string;
-  icon: LucideIcon;
-  color: string;
+  slug?: string;
+  color?: string;
+  active?: boolean;
+  created_at?: string;
+  icon?: LucideIcon;
 }
 
 interface PlatformContextType {
   platforms: Platform[];
-  addPlatform: (name: string) => void;
+  addPlatform: (name: string, color?: string) => void;
   removePlatform: (id: string) => void;
+  loading: boolean;
 }
 
-const initialPlatforms: Platform[] = [
-  { id: "insta", name: "اینستاگرام", icon: Instagram, color: "#E1306C" },
-  { id: "tele", name: "تلگرام", icon: Send, color: "#0088cc" },
-  { id: "tiktok", name: "تیک‌تاک", icon: Smartphone, color: "#ff0050" },
-];
+const platformIcons: { [key: string]: LucideIcon } = {
+  "اینستاگرام": Instagram,
+  "instagram": Instagram,
+  "تلگرام": Send,
+  "telegram": Send,
+  "تیک‌تاک": Smartphone,
+  "tiktok": Smartphone,
+};
 
 const PlatformContext = createContext<PlatformContextType | undefined>(undefined);
 
 export function PlatformProvider({ children }: { children: ReactNode }) {
-  const [platforms, setPlatforms] = useState<Platform[]>(initialPlatforms);
+  const [platforms, setPlatforms] = useState<Platform[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const addPlatform = (name: string) => {
+  useEffect(() => {
+    const fetchPlatforms = async () => {
+      try {
+        const response = await fetch("/api/platforms");
+        if (response.ok) {
+          const data = await response.json();
+          const platformsWithIcons = (data.items || []).map((p: Platform) => ({
+            ...p,
+            icon: platformIcons[p.name] || platformIcons[p.slug || ""] || AppWindow,
+          }));
+          setPlatforms(platformsWithIcons);
+        }
+      } catch (error) {
+        console.error("Failed to fetch platforms:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlatforms();
+  }, []);
+
+  const addPlatform = (name: string, color: string = "#8b5cf6") => {
     const newPlatform: Platform = {
       id: Math.random().toString(36).substr(2, 9),
       name,
-      icon: AppWindow, // Default icon for new platforms
-      color: "#8b5cf6",
+      color,
+      icon: platformIcons[name] || AppWindow,
     };
     setPlatforms([...platforms, newPlatform]);
   };
@@ -42,7 +72,7 @@ export function PlatformProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <PlatformContext.Provider value={{ platforms, addPlatform, removePlatform }}>
+    <PlatformContext.Provider value={{ platforms, addPlatform, removePlatform, loading }}>
       {children}
     </PlatformContext.Provider>
   );

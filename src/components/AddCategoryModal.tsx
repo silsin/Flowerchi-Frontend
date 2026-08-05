@@ -13,14 +13,15 @@ interface AddCategoryModalProps {
 
 export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: AddCategoryModalProps) {
   const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleNameChange = (value: string) => {
-    setName(value);
-    // Auto-generate slug from name
-    setSlug(value.toLowerCase().replace(/\s+/g, "-"));
+  const generateSlug = (text: string) => {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\u0600-\u06ff]+/g, "-")
+      .replace(/^-|-$/g, "");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,8 +33,10 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
       return;
     }
 
-    if (!slug.trim()) {
-      setError("شناسه یکتا الزامی است");
+    const slug = generateSlug(name);
+
+    if (!slug) {
+      setError("نام دسته‌بندی باید حاوی کاراکترهای معتبری باشد");
       return;
     }
 
@@ -41,7 +44,6 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
     try {
       await onSubmit(name, slug);
       setName("");
-      setSlug("");
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "خطای نامشخصی رخ داد");
@@ -55,6 +57,16 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      style={{ 
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
       onClick={onClose}
     >
       <motion.div
@@ -95,12 +107,12 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: "1.5rem" }}>
             <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.875rem", opacity: 0.8 }}>
-              نام دسته‌بندی
+              نام دسته‌بندی *
             </label>
             <input
               type="text"
               value={name}
-              onChange={(e) => handleNameChange(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               placeholder="مثال: فالور واقعی"
               autoFocus
               disabled={isLoading}
@@ -114,31 +126,6 @@ export function AddCategoryModal({ isOpen, onClose, onSubmit, platformName }: Ad
                 outline: "none",
                 fontSize: "1rem",
                 direction: "rtl",
-                boxSizing: "border-box",
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: "1.5rem" }}>
-            <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.875rem", opacity: 0.8 }}>
-              شناسه یکتا (انگلیسی)
-            </label>
-            <input
-              type="text"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              placeholder="followers-real"
-              disabled={isLoading}
-              style={{
-                width: "100%",
-                padding: "0.75rem 1rem",
-                borderRadius: "12px",
-                border: "1px solid var(--card-border)",
-                background: "rgba(255,255,255,0.05)",
-                color: "white",
-                outline: "none",
-                fontSize: "1rem",
-                direction: "ltr",
                 boxSizing: "border-box",
               }}
             />
